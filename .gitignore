@@ -1,0 +1,4 @@
+lib
+lib-cov
+test.log
+src/*.js
