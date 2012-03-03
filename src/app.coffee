@@ -117,8 +117,12 @@ routes.debugger = (req, res) ->
                 app.logger.debug(stdout)
                 app.logger.error(err) if err
                 #return res.end() if err
-                output = '['+stdout.split('\n')+']'
-                return res.end(output)
+                output = stdout.split('\n')
+                last = output.pop()
+                output.push(last) if last
+                output = '['+output.join(',')+']'
+                app.logger.debug(output)
+                return res.end(JSON.stringify(output))
 # Routes
 
 #cross_domain = (req, res, next) ->

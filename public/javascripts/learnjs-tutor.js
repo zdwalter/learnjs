@@ -72,17 +72,17 @@ $(document).ready(function() {
 
     if (appMode == 'edit') {
       $("#inputPane").show();
-      $("#pyOutputPane").hide();
+      $("#outputPane").hide();
     }
     else if (appMode == 'visualize') {
       $("#inputPane").hide();
-      $("#pyOutputPane").show();
+      $("#outputPane").show();
 
       $('#executeBtn').html("Visualize execution");
       $('#executeBtn').attr('disabled', false);
 
 
-      // do this AFTER making #pyOutputPane visible, or else
+      // do this AFTER making #outputPane visible, or else
       // jsPlumb connectors won't render properly
       processTrace(curTrace /* kinda dumb and redundant */, false);
     }
@@ -102,12 +102,14 @@ $(document).ready(function() {
   $("#executeBtn").click(function() {
     $('#executeBtn').html("Please wait ... processing your code");
     $('#executeBtn').attr('disabled', true);
-    $("#pyOutputPane").hide();
+    $("#outputPane").hide();
 
     $.post("/jdb",
            {user_script : $("#jsInput").val()},
            function(traceData) {
-             renderPyCodeOutput($("#jsInput").val());
+               traceData = JSON.parse(traceData);
+             if ($.debug) console.log(traceData);
+             renderCodeOutput($("#jsInput").val());
              enterVisualizeMode(traceData);
            },
            "json");
@@ -121,103 +123,11 @@ $(document).ready(function() {
 
   // canned examples
 
-  $("#tutorialExampleLink").click(function() {
-    $.get("example-code/py_tutorial.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#strtokExampleLink").click(function() {
-    $.get("example-code/strtok.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#fibonacciExampleLink").click(function() {
-    $.get("example-code/fib.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#memoFibExampleLink").click(function() {
-    $.get("example-code/memo_fib.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#factExampleLink").click(function() {
-    $.get("example-code/fact.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#filterExampleLink").click(function() {
-    $.get("example-code/filter.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#insSortExampleLink").click(function() {
-    $.get("example-code/ins_sort.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#aliasExampleLink").click(function() {
-    $.get("example-code/aliasing.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#newtonExampleLink").click(function() {
-    $.get("example-code/sqrt.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#oopSmallExampleLink").click(function() {
-    $.get("example-code/oop_small.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#mapExampleLink").click(function() {
-    $.get("example-code/map.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#oop1ExampleLink").click(function() {
-    $.get("example-code/oop_1.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#oop2ExampleLink").click(function() {
-    $.get("example-code/oop_2.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#inheritanceExampleLink").click(function() {
-    $.get("example-code/oop_inherit.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#sumExampleLink").click(function() {
-    $.get("example-code/sum.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#pwGcdLink").click(function() {
-    $.get("example-code/wentworth_gcd.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#pwSumListLink").click(function() {
-    $.get("example-code/wentworth_sumList.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#towersOfHanoiLink").click(function() {
-    $.get("example-code/towers_of_hanoi.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-  $("#pwTryFinallyLink").click(function() {
-    $.get("example-code/wentworth_try_finally.txt", function(dat) {$("#jsInput").val(dat);});
-    return false;
-  });
-
-
+  //$("#tutorialExampleLink").click(function() {
+  //  $.get("example-code/py_tutorial.txt", function(dat) {$("#jsInput").val(dat);});
+  //  return false;
+  //});
   // select an example on start-up:
-  $("#aliasExampleLink").trigger('click');
+  //$("#aliasExampleLink").trigger('click');
 });
 

@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // code that is common to all Online JS Tutor pages
 
+$.debug=true;
+
 var appMode = 'edit'; // 'edit', 'visualize', or 'grade' (only for question.html)
 
 // set to true to use jsPlumb library to render connections between
@@ -91,7 +93,7 @@ function processTrace(traceData, jumpToEnd) {
   curInstr = 0;
 
   // delete all stale output
-  $("#pyStdout").val('');
+  $("#stdout").val('');
 
   if (curTrace.length > 0) {
     var lastEntry = curTrace[curTrace.length - 1];
@@ -134,7 +136,7 @@ function processTrace(traceData, jumpToEnd) {
 }
 
 function highlightCodeLine(curLine, visitedLinesSet, hasError, isTerminated) {
-  var tbl = $("table#pyCodeOutput");
+  var tbl = $("table#codeOutput");
 
   // reset then set:
   tbl.find('td.lineNo').css('color', '');
@@ -251,12 +253,12 @@ function updateOutput() {
   // render stdout:
 
   // keep original horizontal scroll level:
-  var oldLeft = $("#pyStdout").scrollLeft();
-  $("#pyStdout").val(curEntry.stdout);
+  var oldLeft = $("#stdout").scrollLeft();
+  $("#stdout").val(curEntry.stdout);
 
-  $("#pyStdout").scrollLeft(oldLeft);
+  $("#stdout").scrollLeft(oldLeft);
   // scroll to bottom, tho:
-  $("#pyStdout").scrollTop($("#pyStdout").attr('scrollHeight'));
+  $("#stdout").scrollTop($("#stdout").attr('scrollHeight'));
 
 
   // finally, render all the data structures!!!
@@ -265,145 +267,7 @@ function updateOutput() {
 
 // Renders the current trace entry (curEntry) into the div named by vizDiv
 function renderDataStructures(curEntry, vizDiv) {
-  if (useJsPlumbRendering) { 
-    renderDataStructuresVersion2(curEntry, vizDiv);
-  }
-  else {
-    renderDataStructuresVersion1(curEntry, vizDiv);
-  }
-}
-
-
-// The ORIGINAL "1.0" version of renderDataStructures, which renders
-// variables and values INLINE within each stack frame without any
-// explicit representation of data structure aliasing.
-//
-// This version was originally created in January 2010
-function renderDataStructuresVersion1(curEntry, vizDiv) {
-  // render data structures:
-
-  $(vizDiv).empty(); // jQuery empty() is better than .html('')
-
-  // render locals on stack:
-  if (curEntry.stack_locals != undefined) {
-    $.each(curEntry.stack_locals, function (i, frame) {
-      var funcName = htmlspecialchars(frame[0]); // might contain '<' or '>' for weird names like <genexpr>
-      var localVars = frame[1];
-
-      $(vizDiv).append('<div class="vizFrame">Local variables for <span style="font-family: Andale mono, monospace;">' + funcName + '</span>:</div>');
-
-      // render locals in alphabetical order for tidiness:
-      var orderedVarnames = [];
-
-      // use plain ole' iteration rather than jQuery $.each() since
-      // the latter breaks when a variable is named "length"
-      for (varname in localVars) {
-        orderedVarnames.push(varname);
-      }
-      orderedVarnames.sort();
-
-      if (orderedVarnames.length > 0) {
-        $(vizDiv + " .vizFrame:last").append('<br/><table class="frameDataViz"></table>');
-        var tbl = $("#pyOutputPane table:last");
-        $.each(orderedVarnames, function(i, varname) {
-          var val = localVars[varname];
-          tbl.append('<tr><td class="varname"></td><td class="val"></td></tr>');
-          var curTr = tbl.find('tr:last');
-          if (varname == '__return__') {
-            curTr.find("td.varname").html('<span style="font-size: 10pt; font-style: italic;">return value</span>');
-          }
-          else {
-            curTr.find("td.varname").html(varname);
-          }
-          renderData(val, curTr.find("td.val"), false);
-        });
-
-        tbl.find("tr:last").find("td.varname").css('border-bottom', '0px');
-        tbl.find("tr:last").find("td.val").css('border-bottom', '0px');
-      }
-      else {
-        $(vizDiv + " .vizFrame:last").append(' <i>none</i>');
-      }
-    });
-  }
-
-
-  // render globals LAST:
-
-  $(vizDiv).append('<div class="vizFrame">Global variables:</div>');
-
-  var nonEmptyGlobals = false;
-  var curGlobalFields = {};
-  if (curEntry.globals != undefined) {
-    // use plain ole' iteration rather than jQuery $.each() since
-    // the latter breaks when a variable is named "length"
-    for (varname in curEntry.globals) {
-      curGlobalFields[varname] = true;
-      nonEmptyGlobals = true;
-    }
-  }
-
-  if (nonEmptyGlobals) {
-    $(vizDiv + " .vizFrame:last").append('<br/><table class="frameDataViz"></table>');
-
-    // render all global variables IN THE ORDER they were created by the program,
-    // in order to ensure continuity:
-    //
-    // TODO: in the future, the back-end can actually pre-compute this
-    // list so that the front-end doesn't have to do any extra work!
-
-    var orderedGlobals = []
-
-    // iterating over ALL instructions (could be SLOW if not for our optimization below)
-    for (var i = 0; i <= curInstr; i++) {
-      // some entries (like for exceptions) don't have GLOBALS
-      if (curTrace[i].globals == undefined) continue;
-
-      // use plain ole' iteration rather than jQuery $.each() since
-      // the latter breaks when a variable is named "length"
-      for (varname in curTrace[i].globals) {
-        // eliminate duplicates (act as an ordered set)
-        if ($.inArray(varname, orderedGlobals) == -1) {
-          orderedGlobals.push(varname);
-          curGlobalFields[varname] = undefined; // 'unset it'
-        }
-      }
-
-      var earlyStop = true;
-      // as an optimization, STOP as soon as you've found everything in curGlobalFields:
-      for (o in curGlobalFields) {
-        if (curGlobalFields[o] != undefined) {
-          earlyStop = false;
-          break;
-        }
-      }
-
-      if (earlyStop) {
-        break;
-      }
-    }
-
-    var tbl = $("#pyOutputPane table:last");
-
-    // iterate IN ORDER (it's possible that not all vars are in curEntry.globals)
-    $.each(orderedGlobals, function(i, varname) {
-      var val = curEntry.globals[varname];
-      // (use '!==' to do an EXACT match against undefined)
-      if (val !== undefined) { // might not be defined at this line, which is OKAY!
-        tbl.append('<tr><td class="varname"></td><td class="val"></td></tr>');
-        var curTr = tbl.find('tr:last');
-        curTr.find("td.varname").html(varname);
-        renderData(val, curTr.find("td.val"), false);
-      }
-    });
-
-    tbl.find("tr:last").find("td.varname").css('border-bottom', '0px');
-    tbl.find("tr:last").find("td.val").css('border-bottom', '0px');
-  }
-  else {
-    $(vizDiv + " .vizFrame:last").append(' <i>none</i>');
-  }
-
+    renderDataStructures(curEntry, vizDiv);
 }
 
 
@@ -426,7 +290,7 @@ function varnameToCssID(varname) {
 // explicitly represented via line connectors (thanks to jsPlumb lib).
 //
 // This version was originally created in September 2011
-function renderDataStructuresVersion2(curEntry, vizDiv) {
+function renderDataStructures(curEntry, vizDiv) {
 
   // before we wipe out the old state of the visualization, CLEAR all
   // the click listeners first
@@ -517,6 +381,54 @@ function renderDataStructuresVersion2(curEntry, vizDiv) {
     }
   }
 
+  var nonEmptyLocals = false;
+  var curLocalFields = {};
+  if (curEntry.globals != undefined) {
+    // use plain ole' iteration rather than jQuery $.each() since
+    // the latter breaks when a variable is named "length"
+    for (varname in curEntry.globals) {
+      curLocalFields[varname] = true;
+      nonEmptyLocals = true;
+    }
+  }
+
+  // render all global variables IN THE ORDER they were created by the program,
+  // in order to ensure continuity:
+  var orderedLocals = []
+
+  if (nonEmptyLocals) {
+    // iterating over ALL instructions up to curInstr
+    // (could be SLOW if not for our optimization below)
+    //
+    // TODO: this loop still seems like it can be optimized further if necessary
+    for (var i = 0; i <= curInstr; i++) {
+      // some entries (like for exceptions) don't have localS
+      if (curTrace[i].locals == undefined) continue;
+
+      // use plain ole' iteration rather than jQuery $.each() since
+      // the latter breaks when a variable is named "length"
+      for (varname in curTrace[i].locals) {
+        // eliminate duplicates (act as an ordered set)
+        if ($.inArray(varname, orderedLocals) == -1) {
+          orderedLocals.push(varname);
+          curLocalFields[varname] = undefined; // 'unset it'
+        }
+      }
+
+      var earlyStop = true;
+      // as an optimization, STOP as soon as you've found everything in curLocalFields:
+      for (o in curLocalFields) {
+        if (curLocalFields[o] != undefined) {
+          earlyStop = false;
+          break;
+        }
+      }
+
+      if (earlyStop) {
+        break;
+      }
+    }
+  }
 
   // Key:   CSS ID of the div element representing the variable
   // Value: CSS ID of the div element representing the value rendered in the heap
@@ -562,6 +474,46 @@ function renderDataStructuresVersion2(curEntry, vizDiv) {
       });
     }
   }
+
+  function renderLocals() {
+    // render global variables:
+    if (orderedLocals.length > 0) {
+      $(vizDiv + " #stack").append('<div class="stackFrame" id="locals"><div id="locals_header" class="stackFrameHeader inactiveStackFrameHeader">Local variables</div></div>');
+
+      $(vizDiv + " #stack #locals").append('<table class="stackFrameVarTable" id="local_table"></table>');
+
+      var tbl = $(vizDiv + " #local_table");
+      // iterate IN ORDER (it's possible that not all vars are in curEntry.locals)
+      $.each(orderedLocals, function(i, varname) {
+        var val = curEntry.locals[varname];
+        // (use '!==' to do an EXACT match against undefined)
+        if (val !== undefined) { // might not be defined at this line, which is OKAY!
+          tbl.append('<tr><td class="stackFrameVar">' + varname + '</td><td class="stackFrameValue"></td></tr>');
+          var curTr = tbl.find('tr:last');
+
+          // render primitives inline
+          if (isPrimitiveType(val)) {
+            renderData(val, curTr.find("td.stackFrameValue"), false);
+          }
+          else {
+            // add a stub so that we can connect it with a connector later.
+            // IE needs this div to be NON-EMPTY in order to properly
+            // render jsPlumb endpoints, so that's why we add an "&nbsp;"!
+
+            // make sure varname doesn't contain any weird
+            // characters that are illegal for CSS ID's ...
+            var varDivID = 'local__' + varnameToCssID(varname);
+            curTr.find("td.stackFrameValue").append('<div id="' + varDivID + '">&nbsp;</div>');
+
+            assert(connectionEndpointIDs[varDivID] === undefined);
+            var heapObjID = 'heap_object_' + getObjectID(val);
+            connectionEndpointIDs[varDivID] = heapObjID;
+          }
+        }
+      });
+    }
+  }
+
 
   function renderStackFrame(frame) {
     var funcName = htmlspecialchars(frame[0]); // might contain '<' or '>' for weird names like <genexpr>
@@ -647,6 +599,7 @@ function renderDataStructuresVersion2(curEntry, vizDiv) {
 
   if (stackGrowsDown) {
     renderGlobals();
+    renderLocals();
     if (curEntry.stack_locals) {
       for (var i = curEntry.stack_locals.length - 1; i >= 0; i--) {
         var frame = curEntry.stack_locals[i];
@@ -661,7 +614,7 @@ function renderDataStructuresVersion2(curEntry, vizDiv) {
         renderStackFrame(frame);
       }
     }
-    renderGlobals();
+    renderLocals();
   }
 
 
@@ -1101,8 +1054,8 @@ String.prototype.rtrim = function() {
   return this.replace(/\s*$/g, "");
 }
 
-function renderPyCodeOutput(codeStr) {
-  var tbl = $("#pyCodeOutput");
+function renderCodeOutput(codeStr) {
+  var tbl = $("#codeOutput");
   tbl.empty(); // jQuery empty() is better than .html('')
   var lines = codeStr.rtrim().split('\n');
 
