@@ -14,7 +14,7 @@ app.config = require './config'
 app.configure ->
     app.set 'views', __dirname + '/../views'
     app.set 'view engine', 'jade'
-    app.set 'view options', { layout: false }
+    app.set 'view options', { layout: true }
     app.use express.methodOverride()
     app.use app.router
     app.use express.static(__dirname + '/../public/')
@@ -75,6 +75,9 @@ routes.postForm = (req, res, next) ->
 routes.index = (req, res) ->
     res.render 'index', { title: 'learnJS' }
 
+routes.tutor = (req, res) ->
+    res.render 'tutor', { title: 'learn Javascript Online Tutor' }
+
 routes.error = (err, res, client) ->
     return app.apiResponse(res, {error: JSON.stringify(err)}, client)
 
@@ -86,8 +89,16 @@ routes.config = (req, res) ->
         send: app.config.send
     return app.apiResponse res, config
 
+debug_template = fs.readFileSync(__dirname+'/../public/javascripts/debug.js')
+
 routes.debugger = (req, res) ->
-    return
+    for field in req.json.fields
+        app.logger.debug(JSON.stringify(field))
+        if field.name isnt 'user_script'
+            continue
+        user_script = field.value[0]
+        app.logger.debug(user_script)
+    return res.end()
 # Routes
 
 #cross_domain = (req, res, next) ->
@@ -100,6 +111,8 @@ routes.debugger = (req, res) ->
 app.post '/*', routes.postForm
 
 app.get '/', routes.index
+
+app.get '/tutor.html', routes.tutor
 
 app.get '/config', routes.config
 
