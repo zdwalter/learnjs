@@ -1,7 +1,5 @@
 function _f() {
 //INSERT_CODE
-global_a=1;
-var local_b=2;
 //EXIT;
 _exit = true;
 Debug.setListener(null);
