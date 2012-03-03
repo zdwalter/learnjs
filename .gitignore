@@ -3,3 +3,4 @@ lib-cov
 test.log
 src/*.js
 deps/v8
+bin/d8

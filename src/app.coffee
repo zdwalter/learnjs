@@ -1,6 +1,8 @@
 fs = require 'fs'
 express = require 'express'
 zlib = require 'zlib'
+crypto = require 'crypto'
+exec = require('child_process').exec
 
 formaline = require 'formaline'
 winston = require 'winston'
@@ -89,16 +91,34 @@ routes.config = (req, res) ->
         send: app.config.send
     return app.apiResponse res, config
 
-debug_template = fs.readFileSync(__dirname+'/../public/javascripts/debug.js')
+debug_template = fs.readFileSync(__dirname+'/../public/javascripts/debug.js').toString()
+debug_cmd = "#{__dirname}/../bin/d8 --expose-debug-as debug "
 
 routes.debugger = (req, res) ->
+    user_script = null
     for field in req.json.fields
         app.logger.debug(JSON.stringify(field))
         if field.name isnt 'user_script'
             continue
         user_script = field.value[0]
+    if user_script
         app.logger.debug(user_script)
-    return res.end()
+        md5sum = crypto.createHash('md5')
+        md5sum.update(user_script)
+        md5 = md5sum.digest('hex')
+        
+        debug_script = debug_template.replace('//INSERT_CODE',user_script)
+        debug_file = "/tmp/debug.#{md5}.js"
+        fs.writeFile debug_file, debug_script, (err) ->
+            app.logger.error(err) if err
+            return res.end() if err
+            cmd = debug_cmd+debug_file
+            exec cmd, (err, stdout, stderr) ->
+                app.logger.debug(stdout)
+                app.logger.error(err) if err
+                #return res.end() if err
+                output = '['+stdout.split('\n')+']'
+                return res.end(output)
 # Routes
 
 #cross_domain = (req, res, next) ->

@@ -1,4 +1,7 @@
-
+function _f() {
+//INSERT_CODE
+    process.exit(0);
+}
 Debug = debug.Debug
 var steps = 0;
 
@@ -18,9 +21,16 @@ function listener(event, exec_state, event_data, data) {
       }
       steps++;
       exec_state.prepareStep(Debug.StepAction.StepIn, 1);
-      _print(JSON.stringify(exec_state.frame().func()));
-      _print(JSON.stringify(exec_state.frame().sourceLine()));
-      _print(output);
+      var frame = exec_state.frame();
+      step = {
+        event: "step_line",
+        func_name: "",//frame.func(),
+        globals: {},
+        line: frame.sourceLine(),
+        stack_locals: [],
+        stdout: output,
+        }
+      _print(JSON.stringify(step));
   }
 };
 
@@ -28,9 +38,9 @@ function listener(event, exec_state, event_data, data) {
 Debug.setListener(listener);
 
 // Set a breakpoint on the for statement (line 1).
-Debug.setBreakPoint(f, 1);
+Debug.setBreakPoint(_f, 1);
 
-f();
+_f();
 // Get rid of the debug event listener.
 Debug.setListener(null);
 
