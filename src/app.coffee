@@ -9,6 +9,7 @@ winston = require 'winston'
 optimist = require 'optimist'
 argv = optimist.argv
 
+db = require 'db'
 
 app = module.exports = express.createServer()
 app.config = require './config'
@@ -122,7 +123,11 @@ routes.debugger = (req, res) ->
                 output.push(last) if last
                 output = '['+output.join(',')+']'
                 app.logger.debug(output)
-                return res.end(JSON.stringify(output))
+                object =
+                    time: new Date().getTime()
+                    input: user_script
+                db.mongodb.insert 'user_script', object, () ->
+                    return res.end(JSON.stringify(output))
 # Routes
 
 #cross_domain = (req, res, next) ->
