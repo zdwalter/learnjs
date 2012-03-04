@@ -79,7 +79,7 @@ routes.index = (req, res) ->
     res.render 'index', { title: 'learnJS' }
 
 routes.tutor = (req, res) ->
-    res.render 'tutor', { title: 'learn Javascript Online Tutor' }
+    res.render 'index', { title: 'learn Javascript Online Tutor' }
 
 routes.error = (err, res, client) ->
     return app.apiResponse(res, {error: JSON.stringify(err)}, client)
