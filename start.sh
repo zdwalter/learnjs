@@ -1,3 +1,3 @@
 #!/bin/bash
 make
-NODE_PATH=./src coffee src/app.coffee --port 8180
+NODE_PATH=./lib forever start lib/app.js --port 8180
