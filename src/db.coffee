@@ -67,6 +67,7 @@ db.mongodb.collection = (mongodb, name, callback) ->
     self = this
     if (mongodb.state isnt 'connected')
         mongodb.open (err, mongodb) ->
+            return callback(err) if err
             mongodb.collection name, callback
     else
         mongodb.collection name, callback
@@ -81,7 +82,7 @@ db.mongodb.findOne = (collection, condition, callback) ->
 db.mongodb.insert = (collection, object, callback) ->
     mongodb = db.mongodb.createClient()
     db.mongodb.collection mongodb, collection, (err, collection) ->
-        console.log err if err
+        return callback(err) if err
         collection.insert object, {safe:true}, (err, res) ->
             db.mongodb.releaseClient(mongodb)
             callback(err, res)
@@ -103,10 +104,13 @@ db.mongodb.update = (collection, condition, data, callback) ->
 
 db.mongodb.addToSet = (collection, condition, field, value, callback) ->
     mongodb = db.mongodb.createClient()
+    return callback('mongodb createClient fail') if not mongodb
     db.mongodb.collection mongodb, collection, (err, collection) ->
+        return callback(err) if err or not collection
         data = {}
         data[field] = value
         collection.update condition, {'$addToSet': data}, {safe: true}, (err, res) ->
+            return callback(err) if err
             db.mongodb.releaseClient(mongodb)
             return callback(err, res)
 
