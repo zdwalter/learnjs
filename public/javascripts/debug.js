@@ -30,6 +30,7 @@ function listener(event, exec_state, event_data, data) {
       }
       if (_exit) { return; }
       var frame = exec_state.frame();
+      //_print(JSON.stringify(frame));
       var details_ = frame.details_.details_;
       var globals_ = details_[1];
       if (_steps === 0) {
@@ -114,6 +115,14 @@ Debug.setListener(listener);
 // Set a breakpoint on the for statement (line 1).
 Debug.setBreakPoint(_f, 1);
 
+try {
 _f();
+}
+catch(e) {
+    Debug.setListener(null);
+    _exit = true;
+    var exception = {"event":"uncaught_exception","exception_msg":e.toString(), stdout: _stdout};
+    _print(JSON.stringify(exception));
+}
 // Get rid of the debug event listener.
 

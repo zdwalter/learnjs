@@ -114,6 +114,12 @@ function processTrace(traceData, jumpToEnd) {
       curTrace.shift();
     }
 
+    if (lastEntry.event === 'uncaught_exception') {
+        var last = curTrace.pop(); // kill last entry
+        curTrace.pop();
+        curTrace.push(last);
+    }
+
 
     if (jumpToEnd) {
       // if there's an exception, then jump to the FIRST occurrence of
