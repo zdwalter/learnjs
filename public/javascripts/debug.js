@@ -1,5 +1,6 @@
 function _f() {
 //INSERT_CODE
+x={'a':1}
 //EXIT;
 _exit = true;
 Debug.setListener(null);
@@ -17,6 +18,17 @@ var _stdout = '';
 print = function(_msg) {
      _stdout += _msg +'\n';
 };
+var _typeof = function(obj) {
+    var type = typeof obj;
+    if (type === 'number' || type === 'string') {
+        return type;
+    }
+    var s = JSON.stringify(obj);
+    if (s[0] === '[') return 'LIST';
+    if (s[0] === '{') return 'DICT';
+    return 'NONE';
+}
+
 var _globals_internals = [];
 function listener(event, exec_state, event_data, data) {
   if (event == Debug.DebugEvent.Break) {
@@ -44,15 +56,16 @@ function listener(event, exec_state, event_data, data) {
       }
       var globals = {};
       var globals_list = [];
+      var globals_dict = globals_list;
       for (var _i in globals_) {
           if (globals_.hasOwnProperty(_i) && _globals_internals.indexOf(_i) < 0) {
               var _value = globals_[_i];
-              var _type = typeof _value;
+              var _type = _typeof(_value);
               //_print(_type);
               if (_type === 'number' || _type === 'string') {
                   globals[_i] = _value;
               }
-              if (_type === 'object') {
+              if (_type === 'LIST') {
                   var _id = globals_list.indexOf(_value);
                   if (_id < 0) {
                       _id = globals_list.push(_value);
@@ -62,6 +75,24 @@ function listener(event, exec_state, event_data, data) {
                   }
                   //_print(_id);
                   var _copy = ['LIST',_id].concat(_value);
+                  globals[_i] = _copy;
+              }
+              if (_type === 'DICT') {
+                  var _id = globals_dict.indexOf(_value);
+                  if (_id < 0) {
+                      _id = globals_dict.push(_value);
+                  }
+                  else {
+                      _id++;
+                  }
+                  //_print(_id);
+                  var _copy = ['DICT',_id];
+                  for (var _j in _value) {
+                      if (_value.hasOwnProperty(_j)) {
+                          var _v = _value[_j];
+                          _copy.push([_j, _v]);
+                      }
+                  }
                   globals[_i] = _copy;
               }
           }
@@ -74,11 +105,11 @@ function listener(event, exec_state, event_data, data) {
           var _key = details_[local];
           var _value = details_[local+1];
           local += 2;
-          var _type = typeof _value;
+          var _type = _typeof(_value);
           if (_type === 'number' || _type === 'string') {
               locals[_i] = _value;
           }
-          if (_type === 'object') {
+          if (_type === 'LIST') {
               var _id = globals_list.indexOf(_value);
               if (_id < 0) {
                   _id = globals_list.push(_value);
