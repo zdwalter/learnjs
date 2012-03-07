@@ -75,11 +75,22 @@ routes.postForm = (req, res, next) ->
 
 ##end
 
-routes.index = (req, res) ->
-    res.render 'index', { title: 'learnJS' }
+examples_folder = "#{__dirname}/../public/javascripts/examples"
+examples = {}
+exec "ls #{examples_folder}/*.js", (err, stdout, stderr) ->
+    files = stdout.split('\n')
+    console.log "'#{stdout}'"
+    for file in files
+        try
+            name = file.match('([^/]*)\.js$')[1]
+            href = "/javascripts/examples/#{name}.js"
+            console.log name, href
+            examples[name]=href
+        catch e
+            continue
 
-routes.tutor = (req, res) ->
-    res.render 'index', { title: 'learn Javascript Online Tutor' }
+routes.index = (req, res) ->
+    res.render 'index', { title: 'learnJS', examples: examples }
 
 routes.error = (err, res, client) ->
     return app.apiResponse(res, {error: JSON.stringify(err)}, client)
@@ -140,10 +151,6 @@ routes.debugger = (req, res) ->
 app.post '/*', routes.postForm
 
 app.get '/', routes.index
-
-app.get '/tutor.html', routes.tutor
-
-app.get '/config', routes.config
 
 app.post '/jdb', routes.debugger
 

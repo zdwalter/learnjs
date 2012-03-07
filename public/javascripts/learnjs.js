@@ -1161,7 +1161,8 @@ function JSCommonInit() {
 
 
   // log a generic AJAX error handler
-  $(document).ajaxError(function() {
+  $(document).ajaxError(function(e) {
+      console.log(e);
     alert("Uh oh, the server returned an error, boo :(  Please reload the page and try executing a different JS script.");
   });
 

@@ -1,6 +1,5 @@
 function _f() {
 //INSERT_CODE
-x={'a':1}
 //EXIT;
 _exit = true;
 Debug.setListener(null);
