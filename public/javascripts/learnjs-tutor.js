@@ -107,7 +107,7 @@ $(document).ready(function() {
     $.post("/jdb",
            {user_script : $("#jsInput").val()},
            function(traceData) {
-               traceData = JSON.parse(traceData);
+               //traceData = JSON.parse(traceData);
              if ($.debug) console.log(traceData);
              renderCodeOutput($("#jsInput").val());
              enterVisualizeMode(traceData);

@@ -8,6 +8,7 @@ div
   table#outputPane(border="0")
     tr
       td(valign="top")
+        div#errorOutput
         center
           div#codeOutputDiv
             | Use <b>left</b> and <b>right</b> arrow keys to step through this code:
@@ -20,7 +21,6 @@ div
             span#curInstr Step ? of ?
             button#jmpStepFwd(type="button") Forward &gt;
             button#jmpLastInstr(type="button") Last &gt;&gt;
-          div#errorOutput
         center
           p Program output:
           textarea#stdout(cols="50",rows="13",wrap="off",readonly)

@@ -103,7 +103,7 @@ function processTrace(traceData, jumpToEnd) {
 
     if (instrLimitReached) {
       curTrace.pop() // kill last entry
-      var warningMsg = lastEntry.exception_msg;
+      var warningMsg = lastEntry.exception_msg.replace(/\n/g,'<br>');
       $("#errorOutput").html(htmlspecialchars(warningMsg));
       $("#errorOutput").show();
     }
@@ -226,7 +226,7 @@ function updateOutput() {
       $("#errorOutput").html('Unknown error: Please email a bug report to philip@pgbovine.net');
     }
     else {
-      $("#errorOutput").html(htmlspecialchars(curEntry.exception_msg));
+      $("#errorOutput").html(htmlspecialchars(curEntry.exception_msg).replace(/\n/g,'<br>'));
     }
 
     $("#errorOutput").show();

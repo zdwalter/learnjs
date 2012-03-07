@@ -79,12 +79,10 @@ examples_folder = "#{__dirname}/../public/javascripts/examples"
 examples = {}
 exec "ls #{examples_folder}/*.js", (err, stdout, stderr) ->
     files = stdout.split('\n')
-    console.log "'#{stdout}'"
     for file in files
         try
             name = file.match('([^/]*)\.js$')[1]
             href = "/javascripts/examples/#{name}.js"
-            console.log name, href
             examples[name]=href
         catch e
             continue
@@ -119,26 +117,30 @@ routes.debugger = (req, res) ->
         md5sum.update(user_script)
         md5 = md5sum.digest('hex')
         
-        debug_script = debug_template.replace('//INSERT_CODE',user_script)
+        debug_script = debug_template.replace('//INSERT_CODE',user_script.replace(/\n/g,' //USER_SCRIPT\n'))
         debug_file = "/tmp/debug.#{md5}.js"
         fs.writeFile debug_file, debug_script, (err) ->
             app.logger.error(err) if err
             return res.end() if err
             cmd = debug_cmd+debug_file
+            app.logger.debug(cmd)
             exec cmd, (err, stdout, stderr) ->
+                if err
+                    app.logger.error(stdout)
+                    exception = [{"event":"uncaught_exception","exception_msg":stdout.replace(debug_file, 'input JS')}]
+                    return res.end(JSON.stringify(exception))
                 app.logger.debug(stdout)
-                app.logger.error(err) if err
-                #return res.end() if err
                 output = stdout.split('\n')
                 last = output.pop()
                 output.push(last) if last
-                output = '['+output.join(',')+']'
-                app.logger.debug(output)
+                result = []
+                for o in output
+                    result.push(JSON.parse(o))
                 object =
                     time: new Date().getTime()
                     input: user_script
                 db.mongodb.insert 'user_script', object, () ->
-                    return res.end(JSON.stringify(output))
+                    return res.end(JSON.stringify(result))
 # Routes
 
 #cross_domain = (req, res, next) ->

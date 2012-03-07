@@ -14,10 +14,21 @@ if (typeof _maxStep === 'undefined') {
 var _print = print;
 var _exit = false;
 var _stdout = '';
-print = function(_msg) {
-     _stdout += _msg +'\n';
+print = function() {
+    if (arguments.length === 0) return 
+    var result = arguments[0];
+    for (var i = 1; i < arguments.length; i++) {
+        //_print(result, i, arguments.length)
+        result += ' ' + arguments[i];
+        //_print(result, 'x')
+    }
+    //_print(_stdout);
+    _stdout += result+'\n';
+    //_print(_stdout);
 };
 var _typeof = function(obj) {
+    if (obj === undefined || obj === null)
+        return 'string'
     var type = typeof obj;
     if (type === 'number' || type === 'string') {
         return type;
@@ -41,6 +52,11 @@ function listener(event, exec_state, event_data, data) {
       }
       if (_exit) { return; }
       var frame = exec_state.frame();
+      var text = frame.sourceLineText();
+      if (text.indexOf("//USER_SCRIPT") <= 0) { 
+          exec_state.prepareStep(Debug.StepAction.StepIn, 1);
+          return;
+      } 
       //_print(JSON.stringify(frame));
       var details_ = frame.details_.details_;
       var globals_ = details_[1];
@@ -102,10 +118,13 @@ function listener(event, exec_state, event_data, data) {
       var locals = {};
       while(local+1 < details_.length) {
           var _key = details_[local];
+          if (_key === null || typeof _key === 'undefined') {
+              _key = 'anonymous';
+          }
           var _value = details_[local+1];
           local += 2;
           var _type = _typeof(_value);
-          if (_type === 'number' || _type === 'string') {
+          if (_type === 'number' || _type === 'string' || _type === 'undefined' || _type === null) {
               locals[_i] = _value;
           }
           if (_type === 'LIST') {
@@ -120,8 +139,24 @@ function listener(event, exec_state, event_data, data) {
               var _copy = ['LIST',_id].concat(_value);
               locals[_i] = _copy;
           }
-
-          locals[_key] = _value;
+          if (_type === 'DICT') {
+              var _id = globals_dict.indexOf(_value);
+              if (_id < 0) {
+                  _id = globals_dict.push(_value);
+              }
+              else {
+                  _id++;
+              }
+              //_print(_id);
+              var _copy = ['DICT',_id];
+              for (var _j in _value) {
+                  if (_value.hasOwnProperty(_j)) {
+                      var _v = _value[_j];
+                      _copy.push([_j, _v]);
+                  }
+              }
+              locals[_i] = _copy;
+          }
       }
       var step = {
         event: "step_line",
