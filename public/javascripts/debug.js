@@ -46,6 +46,8 @@ function listener(event, exec_state, event_data, data) {
               exception_msg: "max _steps reached:"+_maxStep,
           }
           _print(JSON.stringify(end));
+          Debug.setListener(null);
+          quit(0);
           return;
       }
       //if (_exit) { return; }

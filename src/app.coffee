@@ -128,7 +128,7 @@ routes.debugger = (req, res) ->
             exec cmd, (err, stdout, stderr) ->
                 if err
                     app.logger.error(stdout)
-                    exception = [{"event":"uncaught_exception","exception_msg":stdout.replace(debug_file, 'input JS')}]
+                    exception = [{"event":"uncaught_exception","exception_msg":stdout.replace(debug_file, 'input JS').replace(/\/\/USER_SCRIPT/g,'')}]
                     return res.end(JSON.stringify(exception))
                 app.logger.debug(stdout)
                 output = stdout.split('\n')

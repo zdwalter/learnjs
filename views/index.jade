@@ -3,6 +3,14 @@ div#inputPane
   textarea.codeInputPane#jsInput(cols="55",rows="20",wrap="off")
   p
   button#executeBtn.bigBtn(type="button") Visualize execution
+  center
+    p Try these small examples:
+    - var f = false
+    each href, name in examples
+      - if (f)
+        |  |  
+      - f = true
+      a(href="#", onclick='load("#{href}");return false;') #{name}
 
 div
   table#outputPane(border="0")
@@ -27,15 +35,6 @@ div
       td(valign="top")
         center
           div#dataViz
-div
-  center
-    p Try these small examples:
-    - var f = false
-    each href, name in examples
-      - if (f)
-        |  |  
-      - f = true
-      a(href="#", onclick='load("#{href}");return false;') #{name}
 script
   function load(url) {
     $.ajax({
