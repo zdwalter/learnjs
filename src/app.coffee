@@ -113,7 +113,8 @@ routes.debugger = (req, res) ->
         user_script = field.value[0]
     if user_script
         app.logger.debug(user_script)
-        user_script += '\n' if user_script.slice(-1) isnt '\n'
+        user_script = user_script.replace(/\s*$/g, "")
+        #user_script += '\n' if user_script.slice(-1) isnt '\n'
         md5sum = crypto.createHash('md5')
         md5sum.update(user_script)
         md5 = md5sum.digest('hex')

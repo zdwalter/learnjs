@@ -1,7 +1,5 @@
 function _f() {
-//INSERT_CODE
-//EXIT;
-}//USER_SCRIPT
+//INSERT_CODE }//USER_SCRIPT
 Debug = debug.Debug
 var _steps = 0;
 
@@ -28,7 +26,7 @@ var _typeof = function(obj) {
     if (obj === undefined || obj === null)
         return 'string'
     var type = typeof obj;
-    if (type === 'number' || type === 'string' || type == 'function') {
+    if (type === 'number' || type === 'string' || type == 'function' || type == 'boolean') {
         return type;
     }
     var s = JSON.stringify(obj);
@@ -78,7 +76,7 @@ function listener(event, exec_state, event_data, data) {
               var _value = globals_[_key];
               var _type = _typeof(_value);
               //_print(_type);
-              if (_type === 'number' || _type === 'string') {
+              if (_type === 'number' || _type === 'string' || _type === 'boolean') {
                   globals[_key] = _value;
               }
               if (_type === 'LIST') {
@@ -135,7 +133,7 @@ function listener(event, exec_state, event_data, data) {
           var _value = details_[local+1];
           local += 2;
           var _type = _typeof(_value);
-          if (_type === 'number' || _type === 'string' || _type === 'undefined' || _type === null) {
+          if (_type === 'number' || _type === 'string' || _type === 'boolean' || _type === 'undefined' || _type === null) {
               locals[_key] = _value;
           }
           if (_type === 'LIST') {
