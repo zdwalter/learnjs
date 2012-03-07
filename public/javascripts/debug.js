@@ -1,9 +1,7 @@
 function _f() {
 //INSERT_CODE
 //EXIT;
-_exit = true;
-Debug.setListener(null);
-}
+}//USER_SCRIPT
 Debug = debug.Debug
 var _steps = 0;
 
@@ -16,7 +14,7 @@ var _exit = false;
 var _stdout = '';
 print = function() {
     if (arguments.length === 0) return 
-    var result = arguments[0];
+    var result = ''+arguments[0];
     for (var i = 1; i < arguments.length; i++) {
         //_print(result, i, arguments.length)
         result += ' ' + arguments[i];
@@ -50,10 +48,10 @@ function listener(event, exec_state, event_data, data) {
           _print(JSON.stringify(end));
           return;
       }
-      if (_exit) { return; }
+      //if (_exit) { return; }
       var frame = exec_state.frame();
       var text = frame.sourceLineText();
-      if (text.indexOf("//USER_SCRIPT") <= 0) { 
+      if (text.indexOf("//USER_SCRIPT") < 0) { 
           exec_state.prepareStep(Debug.StepAction.StepIn, 1);
           return;
       } 

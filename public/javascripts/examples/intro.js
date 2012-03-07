@@ -26,38 +26,19 @@ beatles.push('Ringo')
 for (b in beatles)
     print('Hello', beatles[b])
 
-//// tuple (immutable sequence)
-//ages = (18, 21, 28, 21, 22, 18, 19, 34, 9)
-//
-//// set (no order, no duplicates)
-//uniqueAges = set(ages)
-//uniqueAges.add(18) // already in set, no effect
-//uniqueAges.remove(21)
-//
-//// no guaranteed order when iterating over a set
-//for thisAge in uniqueAges:
-//    print thisAge
-//
-//// testing set membership
-//if 18 in uniqueAges:
-//    print 'There is an 18-year-old present!'
-//
-//// sorting
-//beatles.sort() // in-place
-//orderedUniqueAges = sorted(uniqueAges) // new list
-//
-//// dict - mapping unique keys to values
-//netWorth = {}
-//netWorth['Donald Trump'] = 3000000000
-//netWorth['Bill Gates'] = 58000000000
-//netWorth['Tom Cruise'] = 40000000
-//netWorth['Joe Postdoc'] = 20000
-//
-//// iterating over key-value pairs:
-//for (person, worth) in netWorth.iteritems():
-//    if worth < 1000000:
-//        print 'haha', person, 'is not a millionaire'
-//
-//// testing dict membership
-//if 'Tom Cruise' in netWorth:
-//    print 'show me the money!'
+// dict - mapping unique keys to values
+netWorth = {}
+netWorth['Donald Trump'] = 3000000000
+netWorth['Bill Gates'] = 58000000000
+netWorth['Tom Cruise'] = 40000000
+netWorth['Joe Postdoc'] = 20000
+
+// iterating over key-value pairs:
+for (person in netWorth)
+    worth = netWorth[person]
+    if (worth < 1000000)
+        print('haha', person, 'is not a millionaire')
+
+// testing dict membership
+if ('Tom Cruise' in netWorth)
+    print('show me the money!')
