@@ -29,9 +29,9 @@ var _typeof = function(obj) {
     if (type === 'number' || type === 'string' || type == 'function' || type == 'boolean') {
         return type;
     }
-    var s = JSON.stringify(obj);
-    if (s[0] === '[') return 'LIST';
-    if (s[0] === '{') return 'DICT';
+    if (obj instanceof Array) return 'LIST';
+    var s = Object.prototype.toString.call(obj);
+    if (s === '[object Object]') return 'DICT';
     return 'NONE';
 }
 
@@ -71,70 +71,10 @@ function listener(event, exec_state, event_data, data) {
       var globals_list = [];
       var globals_dict = globals_list;
       var globals_function = globals_list;
-      for (var _key in globals_) {
-          if (globals_.hasOwnProperty(_key) && _globals_internals.indexOf(_key) < 0) {
-              var _value = globals_[_key];
-              var _type = _typeof(_value);
-              //_print(_type);
-              if (_type === 'number' || _type === 'string' || _type === 'boolean') {
-                  globals[_key] = _value;
-              }
-              if (_type === 'LIST') {
-                  var _id = globals_list.indexOf(_value);
-                  if (_id < 0) {
-                      _id = globals_list.push(_value);
-                  }
-                  else {
-                      _id++;
-                  }
-                  //_print(_id);
-                  var _copy = ['LIST',_id].concat(_value);
-                  globals[_key] = _copy;
-              }
-              if (_type === 'DICT') {
-                  var _id = globals_dict.indexOf(_value);
-                  if (_id < 0) {
-                      _id = globals_dict.push(_value);
-                  }
-                  else {
-                      _id++;
-                  }
-                  //_print(_id);
-                  var _copy = ['DICT',_id];
-                  for (var _j in _value) {
-                      if (_value.hasOwnProperty(_j)) {
-                          var _v = _value[_j];
-                          _copy.push([_j, _v]);
-                      }
-                  }
-                  globals[_key] = _copy;
-              }
-              if (_type === 'function') {
-                  var _id = globals_function.indexOf(_value);
-                  if (_id < 0) {
-                      _id = globals_function.push(_value);
-                  }
-                  else {
-                      _id++;
-                  }
-                  globals[_key] = ['function',_id, '<function '+_key+'>'];
-              }
-          }
-      }
-      //_print(JSON.stringify(globals));
-      //_print(JSON.stringify(details_));
-      var local = 9;
-      var locals = {};
-      while(local+1 < details_.length) {
-          var _key = details_[local];
-          if (_key === null || typeof _key === 'undefined') {
-              _key = 'anonymous';
-          }
-          var _value = details_[local+1];
-          local += 2;
+      function globals_parse(_value) {
           var _type = _typeof(_value);
-          if (_type === 'number' || _type === 'string' || _type === 'boolean' || _type === 'undefined' || _type === null) {
-              locals[_key] = _value;
+          if (_type === 'number' || _type === 'string' || _type === 'boolean') {
+              return _value;
           }
           if (_type === 'LIST') {
               var _id = globals_list.indexOf(_value);
@@ -145,8 +85,12 @@ function listener(event, exec_state, event_data, data) {
                   _id++;
               }
               //_print(_id);
-              var _copy = ['LIST',_id].concat(_value);
-              locals[_key] = _copy;
+              var _copy = ['LIST',_id];
+              for (var _i=0; _i < _value.length; _i++) {
+                  var _v = _value[_i];
+                  _copy.push(globals_parse(_v));
+              }
+              return _copy;
           }
           if (_type === 'DICT') {
               var _id = globals_dict.indexOf(_value);
@@ -160,11 +104,11 @@ function listener(event, exec_state, event_data, data) {
               var _copy = ['DICT',_id];
               for (var _j in _value) {
                   if (_value.hasOwnProperty(_j)) {
-                      var _v = _value[_j];
+                      var _v = globals_parse(_value[_j]);
                       _copy.push([_j, _v]);
                   }
               }
-              locals[_key] = _copy;
+              return _copy;
           }
           if (_type === 'function') {
               var _id = globals_function.indexOf(_value);
@@ -174,8 +118,79 @@ function listener(event, exec_state, event_data, data) {
               else {
                   _id++;
               }
-              locals[_key] = ['function',_id, '<function '+_key+'>'];
+              return ['function',_id, '<function '+_key+'>'];
           }
+
+      }
+      for (var _key in globals_) {
+          if (globals_.hasOwnProperty(_key) && _globals_internals.indexOf(_key) < 0) {
+              var _value = globals_[_key];
+              globals[_key] = globals_parse(_value);
+          }
+      }
+      //_print(JSON.stringify(globals));
+      //_print(JSON.stringify(details_));
+      var local = 9;
+      var locals = {};
+      function locals_parse(_value) {
+          var _type = _typeof(_value);
+          if (_type === 'number' || _type === 'string' || _type === 'boolean' || _type === 'undefined' || _type === null) {
+              return _value;
+          }
+          if (_type === 'LIST') {
+              var _id = globals_list.indexOf(_value);
+              if (_id < 0) {
+                  _id = globals_list.push(_value);
+              }
+              else {
+                  _id++;
+              }
+              //_print(_id);
+              var _copy = ['LIST',_id];
+              for (var _i=0; _i < _value.length; _i++) {
+                  var _v = _value[_i];
+                  _copy.push(locals_parse(_v));
+              }
+              return _copy;
+          }
+          if (_type === 'DICT') {
+              var _id = globals_dict.indexOf(_value);
+              if (_id < 0) {
+                  _id = globals_dict.push(_value);
+              }
+              else {
+                  _id++;
+              }
+              //_print(_id);
+              var _copy = ['DICT',_id];
+              for (var _j in _value) {
+                  if (_value.hasOwnProperty(_j)) {
+                      var _v = locals_parse(_value[_j]);
+                      _copy.push([_j, _v]);
+                  }
+              }
+              return _copy;
+          }
+          if (_type === 'function') {
+              var _id = globals_function.indexOf(_value);
+              if (_id < 0) {
+                  _id = globals_function.push(_value);
+              }
+              else {
+                  _id++;
+              }
+              return ['function',_id, '<function '+_key+'>'];
+          }
+
+      }
+      while(local+1 < details_.length) {
+          var _key = details_[local];
+          if (_key === null || typeof _key === 'undefined') {
+              _key = 'anonymous';
+          }
+          var _value = details_[local+1];
+          local += 2;
+          locals[_key] = locals_parse(_value);
       }
       var step = {
         event: "step_line",

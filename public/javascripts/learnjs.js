@@ -389,10 +389,10 @@ function renderDataStructures(curEntry, vizDiv) {
 
   var nonEmptyLocals = false;
   var curLocalFields = {};
-  if (curEntry.globals != undefined) {
+  if (curEntry.locals != undefined) {
     // use plain ole' iteration rather than jQuery $.each() since
     // the latter breaks when a variable is named "length"
-    for (varname in curEntry.globals) {
+    for (varname in curEntry.locals) {
       curLocalFields[varname] = true;
       nonEmptyLocals = true;
     }
@@ -482,7 +482,7 @@ function renderDataStructures(curEntry, vizDiv) {
   }
 
   function renderLocals() {
-    // render global variables:
+    // render locals variables:
     if (orderedLocals.length > 0) {
       $(vizDiv + " #stack").append('<div class="stackFrame" id="locals"><div id="locals_header" class="stackFrameHeader inactiveStackFrameHeader">Local variables</div></div>');
 
@@ -606,6 +606,13 @@ function renderDataStructures(curEntry, vizDiv) {
   if (stackGrowsDown) {
     renderGlobals();
     renderLocals();
+    //if (curEntry.locals) {
+    //    for (var i in curEntry.locals) {
+    //        if (curEntry.locals.hasOwnProperty(i)) {
+    //            renderStackFrame(i);
+    //        }
+    //    }
+    //}
     if (curEntry.stack_locals) {
       for (var i = curEntry.stack_locals.length - 1; i >= 0; i--) {
         var frame = curEntry.stack_locals[i];
@@ -620,7 +627,15 @@ function renderDataStructures(curEntry, vizDiv) {
         renderStackFrame(frame);
       }
     }
+    //if (curEntry.locals) {
+    //    for (var i in curEntry.locals) {
+    //        if (curEntry.locals.hasOwnProperty(i)) {
+    //            renderStackFrame(i);
+    //        }
+    //    }
+    //}
     renderLocals();
+    renderGlobals();
   }
 
 
@@ -669,6 +684,16 @@ function renderDataStructures(curEntry, vizDiv) {
       }
     });
 
+    $.each(orderedLocals, function(i, varname) {
+        var val = curEntry.locals[varname];
+
+        // primitive types are already rendered in the stack
+        if (!isPrimitiveType(val)) {
+            renderHeapObject(val, true); // APPEND
+        }
+    });
+
+
     if (curEntry.stack_locals) {
       $.each(curEntry.stack_locals, function(i, frame) {
         var localVars = frame[1];
@@ -701,6 +726,16 @@ function renderDataStructures(curEntry, vizDiv) {
     for (var i = orderedGlobals.length - 1; i >= 0; i--) {
       var varname = orderedGlobals[i];
       var val = curEntry.globals[varname];
+
+      // primitive types are already rendered in the stack
+      if (!isPrimitiveType(val)) {
+        renderHeapObject(val, false); // PREPEND
+      }
+    }
+
+    for (var i = orderedLocals.length - 1; i >= 0; i--) {
+      var varname = orderedLocals[i];
+      var val = curEntry.locals[varname];
 
       // primitive types are already rendered in the stack
       if (!isPrimitiveType(val)) {
