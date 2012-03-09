@@ -12,6 +12,16 @@ div#inputPane
       - f = true
       a(href="#", onclick='load("#{href}");return false;') #{name}
   center
+    p Examples from the MIT 
+      a(href="http://mit.edu/6.01/") 6.01
+      |  course:
+    - var f = false
+    each href, name in mit
+      - if (f)
+        |  |  
+      - f = true
+      a(href="#", onclick='load("#{href}");return false;') #{name}
+  center
     p Learn Javascript the hard way:
     - var f = false
     each href, name in hard
