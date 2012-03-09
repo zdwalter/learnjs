@@ -87,8 +87,21 @@ exec "ls #{examples_folder}/*.js", (err, stdout, stderr) ->
         catch e
             continue
 
+hard_folder = "#{__dirname}/../public/javascripts/hard"
+hard = {}
+exec "ls #{hard_folder}/*.js", (err, stdout, stderr) ->
+    files = stdout.split('\n')
+    for file in files
+        try
+            name = file.match('([^/]*)\.js$')[1]
+            href = "/javascripts/hard/#{name}.js"
+            hard[name]=href
+        catch e
+            continue
+
+
 routes.index = (req, res) ->
-    res.render 'index', { title: 'learnJS', examples: examples }
+    res.render 'index', { title: 'learnJS', examples: examples, hard: hard }
 
 routes.error = (err, res, client) ->
     return app.apiResponse(res, {error: JSON.stringify(err)}, client)
