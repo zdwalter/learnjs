@@ -1,5 +1,6 @@
 function _f() {
-//INSERT_CODE }//USER_SCRIPT
+//INSERT_CODE 
+}//USER_SCRIPT
 Debug = debug.Debug
 var _steps = 0;
 
