@@ -1,0 +1,10 @@
+/home/limin/tmp/professional-javascript/edition2/html_to_js.php.js
+
+write to file /home/limin/tmp/professional-javascript/edition2/html_to_js.php.js.js
+/home/limin/tmp/professional-javascript/edition2/html_to_js.php~
+
+write to file /home/limin/tmp/professional-javascript/edition2/html_to_js.php~.js
+/home/limin/tmp/professional-javascript/edition2/html_to_js.php~.js
+
+write to file /home/limin/tmp/professional-javascript/edition2/html_to_js.php~.js.js
+/home/limin/tmp/professional-javascript/edition2/simple_html_dom.php

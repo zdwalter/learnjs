@@ -1,0 +1,16 @@
+<?php
+$filename = 'test.htm';
+$html = file_get_html($filename);
+$imgs = array();
+foreach($html->find('title') as $e){
+  //echo $e->src . '<br>';
+  $imgs[] = $e->src;
+}
+$img_src = addslashes($imgs[1]);
+//print $imgs[1]."<br>";
+$name = array();
+foreach($html->find('<h3><a href=') as $e){
+  $name[] = $e->innertext;
+}  
+
+?>
