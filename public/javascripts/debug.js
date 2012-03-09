@@ -221,7 +221,7 @@ _f();
 catch(e) {
     Debug.setListener(null);
     _exit = true;
-    var exception = {"event":"uncaught_exception","exception_msg":e.toString(), stdout: _stdout};
+    var exception = {"event":"uncaught_exception","exception_msg":e.toString().replace(/\/\/USER_SCRIPT/g,''), stdout: _stdout};
     _print(JSON.stringify(exception));
 }
 // Get rid of the debug event listener.
