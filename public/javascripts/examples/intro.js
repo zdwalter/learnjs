@@ -1,4 +1,4 @@
-// Walter's 10-minute intro to Python
+// Walter's 10-minute intro to Javascript
 
 // numbers!
 age = 26
