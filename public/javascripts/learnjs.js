@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // code that is common to all Online JS Tutor pages
 
-$.debug=true;
+$.debug=false;
 
 var appMode = 'edit'; // 'edit', 'visualize', or 'grade' (only for question.html)
 
