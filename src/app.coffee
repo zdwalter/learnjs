@@ -99,15 +99,15 @@ exec "ls #{hard_folder}/*.js", (err, stdout, stderr) ->
         catch e
             continue
 
-professional_folder = "#{__dirname}/../public/javascripts/professional"
-professional = {}
-exec "ls #{professional_folder}/*.js", (err, stdout, stderr) ->
+edition2_folder = "#{__dirname}/../public/javascripts/edition2"
+edition2 = {}
+exec "find #{edition2_folder} -name '*.js'", (err, stdout, stderr) ->
     files = stdout.split('\n')
     for file in files
         try
-            name = file.match('([^/]*)\.js$')[1]
-            href = "/javascripts/professional/#{name}.js"
-            professional[name]=href
+            name = file.match('.*edition2/(.*)\.js$')[1]
+            href = "/javascripts/edition2/#{name}.js"
+            edition2[name]=href
         catch e
             continue
 
@@ -126,7 +126,7 @@ exec "ls #{mit_folder}/*.js", (err, stdout, stderr) ->
 
 
 routes.index = (req, res) ->
-    res.render 'index', { title: 'learnJS', examples: examples, hard: hard, mit: mit, professional: professional}
+    res.render 'index', { title: 'learnJS', examples: examples, hard: hard, mit: mit, professional: edition2}
 
 routes.error = (err, res, client) ->
     return app.apiResponse(res, {error: JSON.stringify(err)}, client)
@@ -152,7 +152,7 @@ routes.debugger = (req, res) ->
     if user_script
         app.logger.debug(user_script)
         user_script = user_script.replace(/\s*$/g, "")
-        #user_script += '\n' if user_script.slice(-1) isnt '\n'
+        user_script += '\n' if user_script.slice(-1) isnt '\n'
         md5sum = crypto.createHash('md5')
         md5sum.update(user_script)
         md5 = md5sum.digest('hex')

@@ -108,7 +108,7 @@ $(document).ready(function() {
            {user_script : $("#jsInput").val()},
            function(traceData) {
                //traceData = JSON.parse(traceData);
-             if ($.debug) console.log(traceData);
+             if ($.debug && typeof console !== 'undefined') console.log(traceData);
              renderCodeOutput($("#jsInput").val());
              enterVisualizeMode(traceData);
            },
